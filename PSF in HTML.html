@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Currency & Metric Converter</title>
+  <!-- Import a modern font -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    /* Reset & Base Styles */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      font-family: 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, #121212, #1c1c1c);
+      color: #eee;
+    }
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    /* Smooth transitions & Animations */
+    .fade-in { animation: fadeIn 0.6s ease-out forwards; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .pulse {
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    /* Splash Screen */
+    .splash {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(145deg, #1d1d1d, #242424);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      text-align: center;
+      padding: 0 20px;
+    }
+    .splash h1 {
+      font-size: 2.8rem;
+      margin-bottom: 20px;
+      letter-spacing: 1px;
+    }
+    .splash p {
+      font-size: 1.1rem;
+      margin-bottom: 30px;
+      color: #bbb;
+    }
+    .splash button {
+      padding: 12px 28px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(to right, #5E5CE6, #007AFF);
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .splash button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    }
+
+    /* Phone Frame */
+    .phone-frame {
+      position: relative;
+      width: 375px;
+      height: 812px;
+      border-radius: 40px;
+      overflow: hidden;
+      background: linear-gradient(145deg, #1d1d1d, #242424);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.9);
+      border: 6px solid transparent;
+      background-clip: padding-box, border-box;
+      background-origin: border-box;
+      background-image: 
+        linear-gradient(#242424, #242424),
+        radial-gradient(circle at 30% 30%, #aaa, #444 70%, #222);
+      display: none; /* Hidden until splash is dismissed */
+    }
+    
+    /* Notch & Speaker */
+    .notch {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 220px;
+      height: 34px;
+      background: #000;
+      border-bottom-left-radius: 18px;
+      border-bottom-right-radius: 18px;
+      margin-top: 8px;
+      z-index: 10;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.6);
+    }
+    .speaker {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 70px;
+      height: 6px;
+      background: #333;
+      border-radius: 3px;
+      z-index: 11;
+    }
+    
+    /* Home Indicator */
+    .home-indicator {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 130px;
+      height: 6px;
+      background: #444;
+      border-radius: 3px;
+      z-index: 10;
+      opacity: 0.8;
+    }
+    
+    /* Screen Area */
+    .screen {
+      position: absolute;
+      top: 48px;   /* leave room for notch */
+      bottom: 48px;/* leave room for home indicator */
+      left: 0;
+      right: 0;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      background: #181818;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding-bottom: 16px;
+    }
+    
+    /* Navigation Bar */
+    .navbar {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      height: 44px;
+      padding: 0 16px;
+      background: transparent;
+    }
+    .navbar button {
+      background: none;
+      border: none;
+      color: #eee;
+      font-size: 22px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .navbar button:hover {
+      transform: scale(1.15);
+    }
+    
+    /* Rates Bar */
+    .rates-bar-container {
+      margin: 8px 16px;
+      background: #262626;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .rates-bar {
+      display: flex;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .rates-bar::-webkit-scrollbar {
+      display: none;
+    }
+    .rate-item {
+      flex: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      background: linear-gradient(145deg, #5E5CE6, #007AFF);
+      margin-right: 6px;
+      font-size: 14px;
+      color: #fff;
+      white-space: nowrap;
+      border-radius: 6px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .rate-item:hover {
+      transform: scale(1.05);
+      box-shadow: 0 3px 12px rgba(0,0,0,0.5);
+    }
+    
+    /* Content Area */
+    .content {
+      padding: 12px 16px;
+    }
+    .section-title {
+      margin: 18px 0 8px;
+      font-weight: 600;
+      font-size: 15px;
+      color: #ddd;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .result-text {
+      margin: 10px 0;
+      font-weight: 700;
+      font-size: 17px;
+      color: #fff;
+      text-align: center;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    }
+    
+    /* Segmented Controls */
+    .segmented-control {
+      display: flex;
+      background: #262626;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 12px;
+      box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
+    }
+    .segment-btn {
+      flex: 1;
+      padding: 12px 0;
+      text-align: center;
+      border: none;
+      background: none;
+      color: #ccc;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .segment-btn:hover {
+      background: rgba(255,255,255,0.1);
+    }
+    .segment-btn.active {
+      background: #5E5CE6;
+      color: #fff;
+      font-weight: 500;
+    }
+    
+    /* Text Fields */
+    .text-field {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      background: rgba(94, 92, 230, 0.2);
+      color: #fff;
+      font-size: 16px;
+      outline: none;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .text-field:focus {
+      background: rgba(94, 92, 230, 0.3);
+      transform: scale(1.02);
+    }
+    .text-field::placeholder {
+      color: #aaa;
+    }
+    
+    /* Primary Button */
+    .primary-btn {
+      width: 100%;
+      padding: 14px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(to right, #5E5CE6, #007AFF);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .primary-btn:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+      transform: translateY(-3px);
+    }
+    .primary-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    
+    /* Bookmarks */
+    .bookmark-info {
+      margin: 6px 0 10px;
+      font-size: 14px;
+      color: #999;
+      text-align: center;
+    }
+    .bookmark-list .bookmark-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #262626;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      transition: background 0.2s;
+    }
+    .bookmark-list .bookmark-item:hover {
+      background: #333;
+    }
+    .bookmark-list .bookmark-btn {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 14px;
+      text-align: left;
+      cursor: pointer;
+    }
+    .bookmark-list .delete-btn {
+      background: none;
+      border: none;
+      color: #FF3B30;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    
+    /* Modal (Settings) */
+    .modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: #262626;
+      border-radius: 12px;
+      padding: 20px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.8);
+      animation: slideDown 0.4s ease-out;
+    }
+    @keyframes slideDown {
+      from { transform: translateY(-20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-header h2 {
+      font-size: 20px;
+      margin: 0;
+      color: #fff;
+    }
+    .close-modal {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 24px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .close-modal:hover {
+      transform: rotate(90deg);
+    }
+    .modal-section {
+      margin-top: 16px;
+    }
+    .modal-section h3 {
+      font-size: 16px;
+      margin-bottom: 8px;
+      color: #ddd;
+    }
+    .modal-section p {
+      font-size: 14px;
+      line-height: 1.4;
+      margin-bottom: 8px;
+      color: #ccc;
+    }
+    .modal-select {
+      width: 100%;
+      padding: 10px;
+      background: rgba(94, 92, 230, 0.2);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      margin-bottom: 8px;
+      outline: none;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Splash / Get Started Screen -->
+  <div id="splash" class="splash fade-in">
+    <h1>Welcome to PSF Converter</h1>
+    <p>A modern currency and metric conversion app that bridges international transactions.</p>
+    <button id="enterAppBtn" class="pulse">Get Started</button>
+  </div>
+  
+  <!-- Phone Frame -->
+  <div id="appFrame" class="phone-frame fade-in">
+    <!-- Notch & Speaker -->
+    <div class="notch"></div>
+    <div class="speaker"></div>
+    
+    <!-- Screen Area -->
+    <div class="screen">
+      <!-- Navigation Bar -->
+      <div class="navbar">
+        <button id="settingsBtn" title="Settings">&#9881;</button>
+      </div>
+      
+      <!-- Rates Bar -->
+      <div class="rates-bar-container">
+        <div id="ratesBar" class="rates-bar"></div>
+      </div>
+      
+      <!-- Main Content -->
+      <div class="content">
+        <!-- Currency 1 Segmented Control -->
+        <h3 class="section-title">Currency</h3>
+        <div id="currency1Segment" class="segmented-control"></div>
+        
+        <!-- Metric 1 Segmented Control -->
+        <h3 class="section-title">Metric</h3>
+        <div id="metric1Segment" class="segmented-control"></div>
+        
+        <!-- Price & Area Fields -->
+        <input type="text" id="priceInput" class="text-field" placeholder="Price" />
+        <input type="text" id="areaInput" class="text-field" placeholder="Area" />
+        
+        <!-- Converted Values -->
+        <h3 id="convertedValueDisplay" class="result-text">0 USD per sqft</h3>
+        <div id="currency2Segment" class="segmented-control"></div>
+        <div id="metric2Segment" class="segmented-control"></div>
+        <h3 id="convertedValueDisplay2" class="result-text">0 USD per sqft</h3>
+        
+        <!-- Bookmarks -->
+        <button id="addBookmarkBtn" class="primary-btn">Add to Bookmarks</button>
+        <p id="bookmarkInfo" class="bookmark-info">You can add 3 more bookmarks.</p>
+        <div id="bookmarksList" class="bookmark-list"></div>
+      </div>
+    </div>
+    
+    <!-- Home Indicator -->
+    <div class="home-indicator"></div>
+  </div>
+  
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Settings</h2>
+        <button class="close-modal" id="closeSettings">&times;</button>
+      </div>
+      <div class="modal-section">
+        <h3>Base Currency</h3>
+        <select id="baseCurrencySelect" class="modal-select"></select>
+      </div>
+      <div class="modal-section">
+        <h3>Conversion Info</h3>
+        <p>1 tsubo = 35.58 sqft and 3.31 sqm</p>
+        <p>1 sqm = 10.76 sqft and 0.303 tsubo</p>
+        <p>1 sqft = 0.028 tsubo and 0.093 sqm</p>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // ---------------------------
+    // DATA & OPTIONS
+    // ---------------------------
+    const currencyOptions = ["JPY", "SGD", "USD", "GBP", "HKD", "CNY", "MYR"];
+    const metricOptions = ["sqft", "sqm", "tsubo"];
+    const exchangeUnits = {
+      "tsubo": 30.25,
+      "sqm": 100.00,
+      "sqft": 1076.43
+    };
+    
+    let exchangeRates = {};
+    let baseCurrency = "USD";
+    
+    // Indices
+    let selectedCurrency = 2;  // USD
+    let selectedMetric = 0;    // sqft
+    let selectedCurrency2 = 0; // JPY
+    let selectedMetric2 = 0;   // sqft
+    
+    let price = "";
+    let area = "";
+    let bookmarks = [];
+    
+    // DOM Elements
+    const splashEl = document.getElementById("splash");
+    const enterAppBtn = document.getElementById("enterAppBtn");
+    const appFrameEl = document.getElementById("appFrame");
+    const ratesBarEl = document.getElementById("ratesBar");
+    const priceInputEl = document.getElementById("priceInput");
+    const areaInputEl = document.getElementById("areaInput");
+    const convertedValueDisplayEl = document.getElementById("convertedValueDisplay");
+    const convertedValueDisplay2El = document.getElementById("convertedValueDisplay2");
+    const addBookmarkBtn = document.getElementById("addBookmarkBtn");
+    const bookmarkInfoEl = document.getElementById("bookmarkInfo");
+    const bookmarksListEl = document.getElementById("bookmarksList");
+    const currency1SegmentEl = document.getElementById("currency1Segment");
+    const metric1SegmentEl = document.getElementById("metric1Segment");
+    const currency2SegmentEl = document.getElementById("currency2Segment");
+    const metric2SegmentEl = document.getElementById("metric2Segment");
+    const settingsBtn = document.getElementById("settingsBtn");
+    const settingsModal = document.getElementById("settingsModal");
+    const closeSettings = document.getElementById("closeSettings");
+    const baseCurrencySelectEl = document.getElementById("baseCurrencySelect");
+    
+    // ---------------------------
+    // SPLASH SCREEN
+    // ---------------------------
+    enterAppBtn.addEventListener("click", () => {
+      splashEl.style.display = "none";
+      appFrameEl.style.display = "block";
+    });
+    
+    // ---------------------------
+    // SEGMENTED CONTROLS
+    // ---------------------------
+    function createSegmentedControl(element, options, selectedIndex, onChange) {
+      element.innerHTML = "";
+      options.forEach((option, index) => {
+        const btn = document.createElement("button");
+        btn.className = "segment-btn";
+        btn.textContent = option;
+        if (index === selectedIndex) {
+          btn.classList.add("active");
+        }
+        btn.addEventListener("click", () => {
+          [...element.querySelectorAll(".segment-btn")].forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          onChange(index);
+        });
+        element.appendChild(btn);
+      });
+    }
+    
+    createSegmentedControl(currency1SegmentEl, currencyOptions, selectedCurrency, (newIndex) => {
+      selectedCurrency = newIndex;
+      updateConvertedDisplay();
+    });
+    createSegmentedControl(metric1SegmentEl, metricOptions, selectedMetric, (newIndex) => {
+      selectedMetric = newIndex;
+      updateConvertedDisplay();
+    });
+    createSegmentedControl(currency2SegmentEl, currencyOptions, selectedCurrency2, (newIndex) => {
+      selectedCurrency2 = newIndex;
+      updateConvertedDisplay();
+    });
+    createSegmentedControl(metric2SegmentEl, metricOptions, selectedMetric2, (newIndex) => {
+      selectedMetric2 = newIndex;
+      updateConvertedDisplay();
+    });
+    
+    // ---------------------------
+    // BASE CURRENCY SELECT
+    // ---------------------------
+    function populateBaseCurrencySelect() {
+      baseCurrencySelectEl.innerHTML = "";
+      currencyOptions.forEach((currency) => {
+        const opt = document.createElement("option");
+        opt.value = currency;
+        opt.textContent = currency;
+        baseCurrencySelectEl.appendChild(opt);
+      });
+      baseCurrencySelectEl.value = baseCurrency;
+    }
+    populateBaseCurrencySelect();
+    
+    // ---------------------------
+    // NUMBER FORMATTING
+    // ---------------------------
+    function formatNumber(num) {
+      return new Intl.NumberFormat().format(num);
+    }
+    
+    // ---------------------------
+    // CONVERSION LOGIC
+    // ---------------------------
+    function getConvertedValue() {
+      const valPrice = parseFloat(price) || 0;
+      const valArea = parseFloat(area) || 0;
+      return valArea !== 0 ? valPrice / valArea : 0;
+    }
+    
+    function getConvertedValue2() {
+      const convVal = getConvertedValue();
+      const curKey1 = currencyOptions[selectedCurrency].toUpperCase();
+      const curKey2 = currencyOptions[selectedCurrency2].toUpperCase();
+      const metricKey1 = metricOptions[selectedMetric].toLowerCase();
+      const metricKey2 = metricOptions[selectedMetric2].toLowerCase();
+      
+      const rate1 = exchangeRates[curKey1];
+      const rate2 = exchangeRates[curKey2];
+      const m1 = exchangeUnits[metricKey1];
+      const m2 = exchangeUnits[metricKey2];
+      
+      if (rate1 && rate2 && m1 && m2) {
+        return (rate2 / rate1) * (m1 / m2) * convVal;
+      }
+      return 0;
+    }
+    
+    function updateConvertedDisplay() {
+      const val1 = Math.round(getConvertedValue());
+      const val2 = Math.round(getConvertedValue2());
+      
+      const currencyLabel1 = currencyOptions[selectedCurrency];
+      const metricLabel1 = metricOptions[selectedMetric];
+      convertedValueDisplayEl.textContent = val1
+        ? `${formatNumber(val1)} ${currencyLabel1} per ${metricLabel1}`
+        : `0 ${currencyLabel1} per ${metricLabel1}`;
+      
+      const currencyLabel2 = currencyOptions[selectedCurrency2];
+      const metricLabel2 = metricOptions[selectedMetric2];
+      convertedValueDisplay2El.textContent = val2
+        ? `${formatNumber(val2)} ${currencyLabel2} per ${metricLabel2}`
+        : `0 ${currencyLabel2} per ${metricLabel2}`;
+    }
+    
+    // ---------------------------
+    // EXCHANGE RATES BAR
+    // ---------------------------
+    function updateRatesBar() {
+      ratesBarEl.innerHTML = "";
+      if (exchangeRates[baseCurrency]) {
+        const baseRate = exchangeRates[baseCurrency];
+        const sortedCurrencies = [...currencyOptions].sort();
+        sortedCurrencies.forEach(cur => {
+          const rate = exchangeRates[cur];
+          if (rate) {
+            let displayedRate;
+            if (baseCurrency === "JPY") {
+              displayedRate = (baseRate / rate).toFixed(0);
+            } else {
+              displayedRate = ((rate / baseRate) * 1).toFixed(cur === "JPY" ? 0 : 2);
+            }
+            const item = document.createElement("div");
+            item.className = "rate-item";
+            item.innerHTML = `<span>${cur}</span><span>${displayedRate}</span>`;
+            ratesBarEl.appendChild(item);
+          }
+        });
+      } else {
+        ratesBarEl.textContent = "Base currency rate not available";
+      }
+    }
+    
+    // ---------------------------
+    // FETCH EXCHANGE RATES (LIVE API)
+    // ---------------------------
+    async function fetchExchangeRates() {
+      const apiKey = "fca_live_R7QWkCQTWbpUkVe4zN2z9nfsNphjNP5EszoCjSAo";
+      const url = `https://api.freecurrencyapi.com/v1/latest?apikey=${apiKey}`;
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("Network response was not ok");
+        const data = await response.json();
+        exchangeRates = data.data || {};
+        updateConvertedDisplay();
+        updateRatesBar();
+      } catch (error) {
+        console.error("Error fetching exchange rates:", error);
+      }
+    }
+    
+    // ---------------------------
+    // BOOKMARKS
+    // ---------------------------
+    function updateBookmarkInfo() {
+      const remaining = Math.max(0, 3 - bookmarks.length);
+      bookmarkInfoEl.textContent = `You can add ${remaining} more bookmarks.`;
+      addBookmarkBtn.disabled = bookmarks.length >= 3;
+    }
+    
+    function renderBookmarks() {
+      bookmarksListEl.innerHTML = "";
+      bookmarks.forEach((bm, index) => {
+        const item = document.createElement("div");
+        item.className = "bookmark-item";
+        const btn = document.createElement("button");
+        btn.className = "bookmark-btn";
+        btn.textContent = `${bm.currency} ${bm.metric} / ${bm.currency2} ${bm.metric2}`;
+        btn.addEventListener("click", () => applyBookmark(bm));
+        const delBtn = document.createElement("button");
+        delBtn.className = "delete-btn";
+        delBtn.innerHTML = "&times;";
+        delBtn.addEventListener("click", () => {
+          bookmarks.splice(index, 1);
+          renderBookmarks();
+          updateBookmarkInfo();
+        });
+        item.appendChild(btn);
+        item.appendChild(delBtn);
+        bookmarksListEl.appendChild(item);
+      });
+    }
+    
+    function addBookmark() {
+      if (bookmarks.length < 3) {
+        const newBookmark = {
+          currency: currencyOptions[selectedCurrency],
+          metric: metricOptions[selectedMetric],
+          currency2: currencyOptions[selectedCurrency2],
+          metric2: metricOptions[selectedMetric2]
+        };
+        bookmarks.push(newBookmark);
+        renderBookmarks();
+        updateBookmarkInfo();
+      }
+    }
+    
+    function applyBookmark(bm) {
+      selectedCurrency = currencyOptions.indexOf(bm.currency);
+      selectedMetric = metricOptions.indexOf(bm.metric);
+      selectedCurrency2 = currencyOptions.indexOf(bm.currency2);
+      selectedMetric2 = metricOptions.indexOf(bm.metric2);
+      
+      createSegmentedControl(currency1SegmentEl, currencyOptions, selectedCurrency, (newIndex) => {
+        selectedCurrency = newIndex; updateConvertedDisplay();
+      });
+      createSegmentedControl(metric1SegmentEl, metricOptions, selectedMetric, (newIndex) => {
+        selectedMetric = newIndex; updateConvertedDisplay();
+      });
+      createSegmentedControl(currency2SegmentEl, currencyOptions, selectedCurrency2, (newIndex) => {
+        selectedCurrency2 = newIndex; updateConvertedDisplay();
+      });
+      createSegmentedControl(metric2SegmentEl, metricOptions, selectedMetric2, (newIndex) => {
+        selectedMetric2 = newIndex; updateConvertedDisplay();
+      });
+      
+      updateConvertedDisplay();
+    }
+    
+    // ---------------------------
+    // HANDLE PRICE & AREA INPUT
+    // ---------------------------
+    let lastPriceInput = "";
+    let lastAreaInput = "";
+    
+    function handleNumberInput(e, field) {
+      let rawValue = e.target.value.replace(/,/g, "");
+      rawValue = rawValue.replace(/[^\d.]/g, "");
+      if (!rawValue) {
+        e.target.value = "";
+        if (field === "price") { price = ""; lastPriceInput = ""; }
+        else { area = ""; lastAreaInput = ""; }
+        updateConvertedDisplay();
+        return;
+      }
+      const numericVal = parseFloat(rawValue);
+      if (isNaN(numericVal)) {
+        e.target.value = field === "price" ? lastPriceInput : lastAreaInput;
+      } else {
+        if (field === "price") {
+          price = numericVal.toString();
+          lastPriceInput = formatNumber(numericVal);
+          e.target.value = lastPriceInput;
+        } else {
+          area = numericVal.toString();
+          lastAreaInput = formatNumber(numericVal);
+          e.target.value = lastAreaInput;
+        }
+      }
+      updateConvertedDisplay();
+    }
+    
+    priceInputEl.addEventListener("input", e => handleNumberInput(e, "price"));
+    areaInputEl.addEventListener("input", e => handleNumberInput(e, "area"));
+    
+    // ---------------------------
+    // EVENT LISTENERS
+    // ---------------------------
+    addBookmarkBtn.addEventListener("click", addBookmark);
+    settingsBtn.addEventListener("click", () => { settingsModal.style.display = "flex"; });
+    closeSettings.addEventListener("click", () => { settingsModal.style.display = "none"; });
+    baseCurrencySelectEl.addEventListener("change", e => {
+      baseCurrency = e.target.value;
+      updateRatesBar();
+    });
+    
+    // ---------------------------
+    // INITIALIZE
+    // ---------------------------
+    fetchExchangeRates();
+    updateConvertedDisplay();
+    updateBookmarkInfo();
+  </script>
+</body>
+</html>
