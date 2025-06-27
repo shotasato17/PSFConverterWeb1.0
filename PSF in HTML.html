@@ -136,7 +136,7 @@
     /* Navigation Bar */
     .navbar {
       display: flex;
-      justify-content: flex-end;
+      justify-content: space-between;
       align-items: center;
       height: 44px;
       padding: 0 16px;
@@ -425,10 +425,120 @@
       font-size: 16px;
     }
 
+    /* Right Sidebar */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 280px;
+      background: #1e1e1e;
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+      z-index: 900;
+      padding: 20px;
+      overflow-y: auto;
+      border-left: 1px solid #333;
+      box-shadow: -5px 0 15px rgba(0,0,0,0.3);
+    }
+    .sidebar.active {
+      transform: translateX(0);
+    }
+    .sidebar-toggle {
+      position: fixed;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #5E5CE6;
+      color: white;
+      border: none;
+      width: 30px;
+      height: 60px;
+      border-radius: 5px 0 0 5px;
+      cursor: pointer;
+      z-index: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+    .sidebar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #333;
+    }
+    .sidebar-header h2 {
+      font-size: 18px;
+      color: #eee;
+    }
+    .sidebar-close {
+      background: none;
+      border: none;
+      color: #aaa;
+      font-size: 24px;
+      cursor: pointer;
+    }
+    .history-item {
+      background: #262626;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      border-left: 3px solid #5E5CE6;
+      transition: transform 0.2s;
+      cursor: pointer;
+    }
+    .history-item:hover {
+      transform: translateX(5px);
+      background: #2a2a2a;
+    }
+    .history-item p {
+      margin: 5px 0;
+      font-size: 14px;
+    }
+    .history-item .time {
+      font-size: 12px;
+      color: #999;
+    }
+    .clear-history {
+      background: #333;
+      color: #eee;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin-top: 15px;
+      cursor: pointer;
+      display: block;
+      width: 100%;
+      transition: background 0.2s;
+    }
+    .clear-history:hover {
+      background: #444;
+    }
+    .conversion-info {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #333;
+    }
+    .conversion-info h3 {
+      font-size: 16px;
+      margin-bottom: 10px;
+      color: #ddd;
+    }
+    .conversion-info p {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #bbb;
+      margin-bottom: 8px;
+    }
+
     /* Responsive Tweaks */
     @media (max-width: 400px) {
       .phone-frame { width: 100vw; height: 100vh; border-radius: 0; }
       .modal-content { max-width: 98vw; }
+      .sidebar { width: 85vw; }
     }
   </style>
 </head>
@@ -492,14 +602,29 @@
         <h3>Base Currency</h3>
         <select id="baseCurrencySelect" class="modal-select"></select>
       </div>
-      <div class="modal-section">
-        <h3>Conversion Info</h3>
-        <p>1 tsubo = 35.58 sqft and 3.31 sqm</p>
-        <p>1 sqm = 10.76 sqft and 0.303 tsubo</p>
-        <p>1 sqft = 0.028 tsubo and 0.093 sqm</p>
-      </div>
     </div>
   </div>
+
+  <!-- Right Sidebar -->
+  <button id="sidebarToggle" class="sidebar-toggle">›</button>
+  <div id="sidebar" class="sidebar">
+    <div class="sidebar-header">
+      <h2>History & Info</h2>
+      <button class="sidebar-close" id="sidebarClose">&times;</button>
+    </div>
+    
+    <h3>Recent Conversions</h3>
+    <div id="historyList"></div>
+    <button id="clearHistory" class="clear-history">Clear History</button>
+    
+    <div class="conversion-info">
+      <h3>Conversion Cheat Sheet</h3>
+      <p>1 tsubo = 35.58 sqft and 3.31 sqm</p>
+      <p>1 sqm = 10.76 sqft and 0.303 tsubo</p>
+      <p>1 sqft = 0.028 tsubo and 0.093 sqm</p>
+    </div>
+  </div>
+
   <script>
     // ---------------------------
     // DATA & OPTIONS
@@ -514,6 +639,7 @@
     
     let exchangeRates = {};
     let baseCurrency = "USD";
+    let conversionHistory = [];
     
     // Indices
     let selectedCurrency = 2;  // USD
@@ -545,13 +671,31 @@
     const settingsModal = document.getElementById("settingsModal");
     const closeSettings = document.getElementById("closeSettings");
     const baseCurrencySelectEl = document.getElementById("baseCurrencySelect");
-    
+    const sidebar = document.getElementById("sidebar");
+    const sidebarToggle = document.getElementById("sidebarToggle");
+    const sidebarClose = document.getElementById("sidebarClose");
+    const historyList = document.getElementById("historyList");
+    const clearHistory = document.getElementById("clearHistory");
+
     // ---------------------------
     // SPLASH SCREEN
     // ---------------------------
     enterAppBtn.addEventListener("click", () => {
       splashEl.style.display = "none";
       appFrameEl.style.display = "block";
+    });
+    
+    // ---------------------------
+    // SIDEBAR TOGGLE
+    // ---------------------------
+    sidebarToggle.addEventListener("click", () => {
+      sidebar.classList.toggle("active");
+      sidebarToggle.style.display = "none";
+    });
+    
+    sidebarClose.addEventListener("click", () => {
+      sidebar.classList.remove("active");
+      sidebarToggle.style.display = "flex";
     });
     
     // ---------------------------
@@ -656,7 +800,100 @@
       convertedValueDisplay2El.textContent = val2
         ? `${formatNumber(val2)} ${currencyLabel2} per ${metricLabel2}`
         : `0 ${currencyLabel2} per ${metricLabel2}`;
+      
+      // Add to history if we have valid values
+      if (price && area && val1 && val2) {
+        addToHistory(currencyLabel1, metricLabel1, val1, currencyLabel2, metricLabel2, val2);
+      }
     }
+    
+    // ---------------------------
+    // CONVERSION HISTORY
+    // ---------------------------
+    function addToHistory(currency1, metric1, value1, currency2, metric2, value2) {
+      // Check if this conversion is the same as the last one to avoid duplicates
+      if (conversionHistory.length > 0) {
+        const last = conversionHistory[conversionHistory.length - 1];
+        if (last.currency1 === currency1 && last.metric1 === metric1 && 
+            last.currency2 === currency2 && last.metric2 === metric2 &&
+            Math.abs(last.value1 - value1) < 1) {
+          return;
+        }
+      }
+      
+      const now = new Date();
+      const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      
+      conversionHistory.push({
+        currency1, metric1, value1,
+        currency2, metric2, value2,
+        time: timeString
+      });
+      
+      // Keep only the last 10 conversions
+      if (conversionHistory.length > 10) {
+        conversionHistory.shift();
+      }
+      
+      renderHistory();
+    }
+    
+    function renderHistory() {
+      historyList.innerHTML = "";
+      
+      if (conversionHistory.length === 0) {
+        const emptyMsg = document.createElement("p");
+        emptyMsg.textContent = "No conversion history yet";
+        emptyMsg.style.color = "#999";
+        emptyMsg.style.textAlign = "center";
+        emptyMsg.style.marginTop = "20px";
+        historyList.appendChild(emptyMsg);
+        return;
+      }
+      
+      // Show in reverse order (newest first)
+      [...conversionHistory].reverse().forEach((item, index) => {
+        const historyItem = document.createElement("div");
+        historyItem.className = "history-item";
+        historyItem.innerHTML = `
+          <p><strong>${formatNumber(item.value1)} ${item.currency1}/${item.metric1}</strong></p>
+          <p>→ ${formatNumber(item.value2)} ${item.currency2}/${item.metric2}</p>
+          <p class="time">${item.time}</p>
+        `;
+        
+        historyItem.addEventListener("click", () => {
+          // Apply these conversion settings
+          selectedCurrency = currencyOptions.indexOf(item.currency1);
+          selectedMetric = metricOptions.indexOf(item.metric1);
+          selectedCurrency2 = currencyOptions.indexOf(item.currency2);
+          selectedMetric2 = metricOptions.indexOf(item.metric2);
+          
+          createSegmentedControl(currency1SegmentEl, currencyOptions, selectedCurrency, (newIndex) => {
+            selectedCurrency = newIndex; updateConvertedDisplay();
+          });
+          createSegmentedControl(metric1SegmentEl, metricOptions, selectedMetric, (newIndex) => {
+            selectedMetric = newIndex; updateConvertedDisplay();
+          });
+          createSegmentedControl(currency2SegmentEl, currencyOptions, selectedCurrency2, (newIndex) => {
+            selectedCurrency2 = newIndex; updateConvertedDisplay();
+          });
+          createSegmentedControl(metric2SegmentEl, metricOptions, selectedMetric2, (newIndex) => {
+            selectedMetric2 = newIndex; updateConvertedDisplay();
+          });
+          
+          updateConvertedDisplay();
+          sidebar.classList.remove("active");
+          sidebarToggle.style.display = "flex";
+        });
+        
+        historyList.appendChild(historyItem);
+      });
+    }
+    
+    clearHistory.addEventListener("click", () => {
+      conversionHistory = [];
+      renderHistory();
+    });
     
     // ---------------------------
     // EXCHANGE RATES BAR
