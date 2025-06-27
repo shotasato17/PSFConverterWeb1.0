@@ -354,6 +354,78 @@
       cursor: pointer;
     }
 
+/* Modal (Settings) */
+    .modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: #262626;
+      border-radius: 12px;
+      padding: 20px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.8);
+      animation: slideDown 0.4s ease-out;
+    }
+    @keyframes slideDown {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-header h2 {
+      font-size: 20px;
+      margin: 0;
+      color: #fff;
+    }
+    .close-modal {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 24px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .close-modal:hover {
+      transform: rotate(90deg);
+    }
+    .modal-section {
+      margin-top: 16px;
+    }
+    .modal-section h3 {
+      font-size: 16px;
+      margin-bottom: 8px;
+      color: #ddd;
+    }
+    .modal-section p {
+      font-size: 14px;
+      line-height: 1.4;
+      margin-bottom: 8px;
+      color: #ccc;
+    }
+    .modal-select {
+      width: 100%;
+      padding: 10px;
+      background: rgba(94, 92, 230, 0.2);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      margin-bottom: 8px;
+      outline: none;
+      font-size: 16px;
+    }
+
     /* Right Sidebar */
     .sidebar {
       position: fixed;
@@ -463,68 +535,11 @@
       margin-bottom: 8px;
     }
 
-    /* Base Currency Selector */
-    .base-currency-selector {
-      position: fixed;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      background: #5E5CE6;
-      color: white;
-      border: none;
-      width: 30px;
-      height: 60px;
-      border-radius: 0 5px 5px 0;
-      cursor: pointer;
-      z-index: 800;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-    }
-    .base-currency-panel {
-      position: fixed;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%) translateX(-100%);
-      background: #262626;
-      width: 200px;
-      padding: 15px;
-      border-radius: 0 8px 8px 0;
-      box-shadow: 5px 0 15px rgba(0,0,0,0.3);
-      z-index: 850;
-      transition: transform 0.3s ease;
-    }
-    .base-currency-panel.active {
-      transform: translateY(-50%) translateX(0);
-    }
-    .base-currency-panel h3 {
-      font-size: 16px;
-      margin-bottom: 15px;
-      color: #eee;
-      text-align: center;
-    }
-    .base-currency-option {
-      padding: 8px 12px;
-      margin: 5px 0;
-      background: rgba(94, 92, 230, 0.2);
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .base-currency-option:hover {
-      background: rgba(94, 92, 230, 0.4);
-    }
-    .base-currency-option.active {
-      background: #5E5CE6;
-      font-weight: 500;
-    }
-
     /* Responsive Tweaks */
     @media (max-width: 400px) {
       .phone-frame { width: 100vw; height: 100vh; border-radius: 0; }
+      .modal-content { max-width: 98vw; }
       .sidebar { width: 85vw; }
-      .base-currency-panel { width: 80vw; }
     }
   </style>
 </head>
@@ -577,6 +592,20 @@
     <div class="home-indicator"></div>
   </div>
   
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Settings</h2>
+        <button class="close-modal" id="closeSettings">&times;</button>
+      </div>
+      <div class="modal-section">
+        <h3>Base Currency</h3>
+        <select id="baseCurrencySelect" class="modal-select"></select>
+      </div>
+    </div>
+  </div>
+
   <!-- Right Sidebar -->
   <button id="sidebarToggle" class="sidebar-toggle">›</button>
   <div id="sidebar" class="sidebar">
@@ -597,13 +626,6 @@
     </div>
   </div>
 
-  <!-- Base Currency Selector -->
-  <button id="baseCurrencyToggle" class="base-currency-selector">‹</button>
-  <div id="baseCurrencyPanel" class="base-currency-panel">
-    <h3>Base Currency</h3>
-    <div id="baseCurrencyOptions"></div>
-  </div>
-
   <script>
     // ---------------------------
     // DATA & OPTIONS
@@ -619,8 +641,6 @@
     let exchangeRates = {};
     let baseCurrency = "USD";
     let conversionHistory = [];
-    let historyTimeout = null;
-    let lastHistoryEntry = null;
     
     // Indices
     let selectedCurrency = 2;  // USD
@@ -648,14 +668,15 @@
     const metric1SegmentEl = document.getElementById("metric1Segment");
     const currency2SegmentEl = document.getElementById("currency2Segment");
     const metric2SegmentEl = document.getElementById("metric2Segment");
+    const settingsBtn = document.getElementById("settingsBtn");
+    const settingsModal = document.getElementById("settingsModal");
+    const closeSettings = document.getElementById("closeSettings");
+    const baseCurrencySelectEl = document.getElementById("baseCurrencySelect");
     const sidebar = document.getElementById("sidebar");
     const sidebarToggle = document.getElementById("sidebarToggle");
     const sidebarClose = document.getElementById("sidebarClose");
     const historyList = document.getElementById("historyList");
     const clearHistory = document.getElementById("clearHistory");
-    const baseCurrencyToggle = document.getElementById("baseCurrencyToggle");
-    const baseCurrencyPanel = document.getElementById("baseCurrencyPanel");
-    const baseCurrencyOptions = document.getElementById("baseCurrencyOptions");
 
     // ---------------------------
     // SPLASH SCREEN
@@ -677,30 +698,6 @@
       sidebar.classList.remove("active");
       sidebarToggle.style.display = "flex";
     });
-    
-    // ---------------------------
-    // BASE CURRENCY SELECTOR
-    // ---------------------------
-    baseCurrencyToggle.addEventListener("click", () => {
-      baseCurrencyPanel.classList.toggle("active");
-    });
-    
-    function populateBaseCurrencyOptions() {
-      baseCurrencyOptions.innerHTML = "";
-      currencyOptions.forEach(currency => {
-        const option = document.createElement("div");
-        option.className = `base-currency-option ${currency === baseCurrency ? "active" : ""}`;
-        option.textContent = currency;
-        option.addEventListener("click", () => {
-          baseCurrency = currency;
-          updateRatesBar();
-          populateBaseCurrencyOptions();
-          baseCurrencyPanel.classList.remove("active");
-        });
-        baseCurrencyOptions.appendChild(option);
-      });
-    }
-    populateBaseCurrencyOptions();
     
     // ---------------------------
     // SEGMENTED CONTROLS
@@ -739,6 +736,21 @@
       selectedMetric2 = newIndex;
       updateConvertedDisplay();
     });
+    
+    // ---------------------------
+    // BASE CURRENCY SELECT
+    // ---------------------------
+    function populateBaseCurrencySelect() {
+      baseCurrencySelectEl.innerHTML = "";
+      currencyOptions.forEach((currency) => {
+        const opt = document.createElement("option");
+        opt.value = currency;
+        opt.textContent = currency;
+        baseCurrencySelectEl.appendChild(opt);
+      });
+      baseCurrencySelectEl.value = baseCurrency;
+    }
+    populateBaseCurrencySelect();
     
     // ---------------------------
     // NUMBER FORMATTING
@@ -790,65 +802,34 @@
         ? `${formatNumber(val2)} ${currencyLabel2} per ${metricLabel2}`
         : `0 ${currencyLabel2} per ${metricLabel2}`;
       
-      // Check if we should add to history (only if values are stable for 3 seconds)
+      // Add to history if we have valid values
       if (price && area && val1 && val2) {
-        const currentEntry = {
-          currency1: currencyLabel1,
-          metric1: metricLabel1,
-          value1: val1,
-          currency2: currencyLabel2,
-          metric2: metricLabel2,
-          value2: val2
-        };
-        
-        // Clear any pending timeout
-        if (historyTimeout) {
-          clearTimeout(historyTimeout);
-        }
-        
-        // Check if this is the same as the last entry
-        if (lastHistoryEntry && 
-            lastHistoryEntry.currency1 === currentEntry.currency1 &&
-            lastHistoryEntry.metric1 === currentEntry.metric1 &&
-            lastHistoryEntry.currency2 === currentEntry.currency2 &&
-            lastHistoryEntry.metric2 === currentEntry.metric2 &&
-            Math.abs(lastHistoryEntry.value1 - currentEntry.value1) < 1) {
-          return; // Don't add duplicate entries
-        }
-        
-        // Set a timeout to add to history after 3 seconds
-        historyTimeout = setTimeout(() => {
-          addToHistory(currentEntry);
-          lastHistoryEntry = currentEntry;
-        }, 3000);
+        addToHistory(currencyLabel1, metricLabel1, val1, currencyLabel2, metricLabel2, val2);
       }
     }
     
     // ---------------------------
     // CONVERSION HISTORY
     // ---------------------------
-    function addToHistory(entry) {
-      const now = new Date();
-      const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      
-      const historyEntry = {
-        ...entry,
-        time: timeString
-      };
-      
-      // Check if this is different from the last entry
+    function addToHistory(currency1, metric1, value1, currency2, metric2, value2) {
+      // Check if this conversion is the same as the last one to avoid duplicates
       if (conversionHistory.length > 0) {
         const last = conversionHistory[conversionHistory.length - 1];
-        if (last.currency1 === historyEntry.currency1 && 
-            last.metric1 === historyEntry.metric1 && 
-            last.currency2 === historyEntry.currency2 && 
-            last.metric2 === historyEntry.metric2 &&
-            Math.abs(last.value1 - historyEntry.value1) < 1) {
-          return; // Skip duplicate entries
+        if (last.currency1 === currency1 && last.metric1 === metric1 && 
+            last.currency2 === currency2 && last.metric2 === metric2 &&
+            Math.abs(last.value1 - value1) < 1) {
+          return;
         }
       }
       
-      conversionHistory.push(historyEntry);
+      const now = new Date();
+      const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      
+      conversionHistory.push({
+        currency1, metric1, value1,
+        currency2, metric2, value2,
+        time: timeString
+      });
       
       // Keep only the last 10 conversions
       if (conversionHistory.length > 10) {
