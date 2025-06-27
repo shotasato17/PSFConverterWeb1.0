@@ -560,7 +560,7 @@
     <div class="screen">
       <!-- Navigation Bar -->
       <div class="navbar">
-        <button id="settingsBtn">;</button>
+        <button id="settingsBtn" title="">&#9881;</button>
       </div>
       <!-- Rates Bar -->
       <div class="rates-bar-container">
@@ -808,94 +808,102 @@
       }
     }
     
-    // ---------------------------
-    // CONVERSION HISTORY
-    // ---------------------------
-    function addToHistory(currency1, metric1, value1, currency2, metric2, value2) {
-      // Check if this conversion is the same as the last one to avoid duplicates
-      if (conversionHistory.length > 0) {
-        const last = conversionHistory[conversionHistory.length - 1];
-        if (last.currency1 === currency1 && last.metric1 === metric1 && 
-            last.currency2 === currency2 && last.metric2 === metric2 &&
-            Math.abs(last.value1 - value1) < 1) {
-          return;
-        }
-      }
-      
-      const now = new Date();
-      const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      
-      conversionHistory.push({
-        currency1, metric1, value1,
-        currency2, metric2, value2,
-        time: timeString
-      });
-      
-      // Keep only the last 10 conversions
-      if (conversionHistory.length > 10) {
-        conversionHistory.shift();
-      }
-      
-      renderHistory();
-    }
     
-    function renderHistory() {
-      historyList.innerHTML = "";
-      
-      if (conversionHistory.length === 0) {
-        const emptyMsg = document.createElement("p");
-        emptyMsg.textContent = "No conversion history yet";
-        emptyMsg.style.color = "#999";
-        emptyMsg.style.textAlign = "center";
-        emptyMsg.style.marginTop = "20px";
-        historyList.appendChild(emptyMsg);
+// ---------------------------
+// CONVERSION HISTORY
+// ---------------------------
+let conversionTimeout;
+
+function addToHistoryDelayed(currency1, metric1, value1, currency2, metric2, value2) {
+  // Clear previous timeout if any
+  clearTimeout(conversionTimeout);
+
+  // Set a delay before adding to history
+  conversionTimeout = setTimeout(() => {
+    // Check if this conversion is the same as the last one to avoid duplicates
+    if (conversionHistory.length > 0) {
+      const last = conversionHistory[conversionHistory.length - 1];
+      if (last.currency1 === currency1 && last.metric1 === metric1 && 
+          last.currency2 === currency2 && last.metric2 === metric2 &&
+          Math.abs(last.value1 - value1) < 1) {
         return;
       }
-      
-      // Show in reverse order (newest first)
-      [...conversionHistory].reverse().forEach((item, index) => {
-        const historyItem = document.createElement("div");
-        historyItem.className = "history-item";
-        historyItem.innerHTML = `
-          <p><strong>${formatNumber(item.value1)} ${item.currency1}/${item.metric1}</strong></p>
-          <p>→ ${formatNumber(item.value2)} ${item.currency2}/${item.metric2}</p>
-          <p class="time">${item.time}</p>
-        `;
-        
-        historyItem.addEventListener("click", () => {
-          // Apply these conversion settings
-          selectedCurrency = currencyOptions.indexOf(item.currency1);
-          selectedMetric = metricOptions.indexOf(item.metric1);
-          selectedCurrency2 = currencyOptions.indexOf(item.currency2);
-          selectedMetric2 = metricOptions.indexOf(item.metric2);
-          
-          createSegmentedControl(currency1SegmentEl, currencyOptions, selectedCurrency, (newIndex) => {
-            selectedCurrency = newIndex; updateConvertedDisplay();
-          });
-          createSegmentedControl(metric1SegmentEl, metricOptions, selectedMetric, (newIndex) => {
-            selectedMetric = newIndex; updateConvertedDisplay();
-          });
-          createSegmentedControl(currency2SegmentEl, currencyOptions, selectedCurrency2, (newIndex) => {
-            selectedCurrency2 = newIndex; updateConvertedDisplay();
-          });
-          createSegmentedControl(metric2SegmentEl, metricOptions, selectedMetric2, (newIndex) => {
-            selectedMetric2 = newIndex; updateConvertedDisplay();
-          });
-          
-          updateConvertedDisplay();
-          sidebar.classList.remove("active");
-          sidebarToggle.style.display = "flex";
-        });
-        
-        historyList.appendChild(historyItem);
-      });
     }
-    
-    clearHistory.addEventListener("click", () => {
-      conversionHistory = [];
-      renderHistory();
+
+    const now = new Date();
+    const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    conversionHistory.push({
+      currency1, metric1, value1,
+      currency2, metric2, value2,
+      time: timeString
     });
-    
+
+    // Keep only the last 10 conversions
+    if (conversionHistory.length > 10) {
+      conversionHistory.shift();
+    }
+
+    renderHistory();
+  }, 3000); // Delay of 3 seconds
+}
+
+function renderHistory() {
+  historyList.innerHTML = "";
+
+  if (conversionHistory.length === 0) {
+    const emptyMsg = document.createElement("p");
+    emptyMsg.textContent = "No conversion history yet";
+    emptyMsg.style.color = "#999";
+    emptyMsg.style.textAlign = "center";
+    emptyMsg.style.marginTop = "20px";
+    historyList.appendChild(emptyMsg);
+    return;
+  }
+
+  // Show in reverse order (newest first)
+  [...conversionHistory].reverse().forEach((item, index) => {
+    const historyItem = document.createElement("div");
+    historyItem.className = "history-item";
+    historyItem.innerHTML = `
+      <p><strong>${formatNumber(item.value1)} ${item.currency1}/${item.metric1}</strong></p>
+      <p>→ ${formatNumber(item.value2)} ${item.currency2}/${item.metric2}</p>
+      <p class="time">${item.time}</p>
+    `;
+
+    historyItem.addEventListener("click", () => {
+      selectedCurrency = currencyOptions.indexOf(item.currency1);
+      selectedMetric = metricOptions.indexOf(item.metric1);
+      selectedCurrency2 = currencyOptions.indexOf(item.currency2);
+      selectedMetric2 = metricOptions.indexOf(item.metric2);
+
+      createSegmentedControl(currency1SegmentEl, currencyOptions, selectedCurrency, (newIndex) => {
+        selectedCurrency = newIndex; updateConvertedDisplay();
+      });
+      createSegmentedControl(metric1SegmentEl, metricOptions, selectedMetric, (newIndex) => {
+        selectedMetric = newIndex; updateConvertedDisplay();
+      });
+      createSegmentedControl(currency2SegmentEl, currencyOptions, selectedCurrency2, (newIndex) => {
+        selectedCurrency2 = newIndex; updateConvertedDisplay();
+      });
+      createSegmentedControl(metric2SegmentEl, metricOptions, selectedMetric2, (newIndex) => {
+        selectedMetric2 = newIndex; updateConvertedDisplay();
+      });
+
+      updateConvertedDisplay();
+      sidebar.classList.remove("active");
+      sidebarToggle.style.display = "flex";
+    });
+
+    historyList.appendChild(historyItem);
+  });
+}
+
+clearHistory.addEventListener("click", () => {
+  conversionHistory = [];
+  renderHistory();
+});
+ 
     // ---------------------------
     // EXCHANGE RATES BAR
     // ---------------------------
