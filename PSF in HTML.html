@@ -820,6 +820,8 @@ function addToHistoryDelayed(currency1, metric1, value1, currency2, metric2, val
 
   // Set a delay before adding to history
   conversionTimeout = setTimeout(() => {
+    console.log("Adding to history..."); // For debugging
+
     // Check if this conversion is the same as the last one to avoid duplicates
     if (conversionHistory.length > 0) {
       const last = conversionHistory[conversionHistory.length - 1];
