@@ -83,6 +83,7 @@
       box-shadow: 0 30px 60px rgba(0,0,0,0.9), 0 4px 24px #222 inset;
       border: 6px solid #222;
       display: none;
+      margin-left: 20px; /* Added space for sidebar */
     }
 
     /* Notch & Speaker */
@@ -425,28 +426,28 @@
       font-size: 16px;
     }
 
-    /* Right Sidebar */
+    /* Left Sidebar */
     .sidebar {
       position: fixed;
       top: 0;
-      right: 0;
+      left: 0;
       bottom: 0;
       width: 280px;
       background: #1e1e1e;
-      transform: translateX(100%);
+      transform: translateX(-100%);
       transition: transform 0.3s ease;
       z-index: 900;
       padding: 20px;
       overflow-y: auto;
-      border-left: 1px solid #333;
-      box-shadow: -5px 0 15px rgba(0,0,0,0.3);
+      border-right: 1px solid #333;
+      box-shadow: 5px 0 15px rgba(0,0,0,0.3);
     }
     .sidebar.active {
       transform: translateX(0);
     }
     .sidebar-toggle {
       position: fixed;
-      right: 0;
+      left: 0;
       top: 50%;
       transform: translateY(-50%);
       background: #5E5CE6;
@@ -454,7 +455,7 @@
       border: none;
       width: 30px;
       height: 60px;
-      border-radius: 5px 0 0 5px;
+      border-radius: 0 5px 5px 0;
       cursor: pointer;
       z-index: 800;
       display: flex;
@@ -534,6 +535,14 @@
       margin-bottom: 8px;
     }
 
+    /* App Container */
+    .app-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+    }
+
     /* Responsive Tweaks */
     @media (max-width: 400px) {
       .phone-frame { width: 100vw; height: 100vh; border-radius: 0; }
@@ -550,45 +559,68 @@
     <button id="enterAppBtn" class="pulse">Get Started</button>
   </div>
   
-  <!-- Phone Frame -->
-  <div id="appFrame" class="phone-frame fade-in">
-    <!-- Notch & Speaker -->
-    <div class="notch"></div>
-    <div class="speaker"></div>
-    <!-- Screen Area -->
-    <div class="screen">
-      <!-- Navigation Bar -->
-      <div class="navbar">
-        <button id="settingsBtn" title="Settings">&#9881;</button>
+  <!-- App Container -->
+  <div class="app-container">
+    <!-- Left Sidebar -->
+    <button id="sidebarToggle" class="sidebar-toggle">‹</button>
+    <div id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <h2>History & Info</h2>
+        <button class="sidebar-close" id="sidebarClose">&times;</button>
       </div>
-      <!-- Rates Bar -->
-      <div class="rates-bar-container">
-        <div id="ratesBar" class="rates-bar"></div>
-      </div>
-      <!-- Main Content -->
-      <div class="content">
-        <!-- Currency 1 Segmented Control -->
-        <h3 class="section-title">Currency</h3>
-        <div id="currency1Segment" class="segmented-control"></div>
-        <!-- Metric 1 Segmented Control -->
-        <h3 class="section-title">Metric</h3>
-        <div id="metric1Segment" class="segmented-control"></div>
-        <!-- Price & Area Fields -->
-        <input type="text" id="priceInput" class="text-field" placeholder="Price" />
-        <input type="text" id="areaInput" class="text-field" placeholder="Area" />
-        <!-- Converted Values -->
-        <h3 id="convertedValueDisplay" class="result-text">0 USD per sqft</h3>
-        <div id="currency2Segment" class="segmented-control"></div>
-        <div id="metric2Segment" class="segmented-control"></div>
-        <h3 id="convertedValueDisplay2" class="result-text">0 USD per sqft</h3>
-        <!-- Bookmarks -->
-        <button id="addBookmarkBtn" class="primary-btn">Add to Bookmarks</button>
-        <p id="bookmarkInfo" class="bookmark-info">You can add 3 more bookmarks.</p>
-        <div id="bookmarksList" class="bookmark-list"></div>
+      
+      <h3>Recent Conversions</h3>
+      <div id="historyList"></div>
+      <button id="clearHistory" class="clear-history">Clear History</button>
+      
+      <div class="conversion-info">
+        <h3>Conversion Cheat Sheet</h3>
+        <p>1 tsubo = 35.58 sqft and 3.31 sqm</p>
+        <p>1 sqm = 10.76 sqft and 0.303 tsubo</p>
+        <p>1 sqft = 0.028 tsubo and 0.093 sqm</p>
       </div>
     </div>
-    <!-- Home Indicator -->
-    <div class="home-indicator"></div>
+  
+    <!-- Phone Frame -->
+    <div id="appFrame" class="phone-frame fade-in">
+      <!-- Notch & Speaker -->
+      <div class="notch"></div>
+      <div class="speaker"></div>
+      <!-- Screen Area -->
+      <div class="screen">
+        <!-- Navigation Bar -->
+        <div class="navbar">
+          <button id="settingsBtn" title="Settings">&#9881;</button>
+        </div>
+        <!-- Rates Bar -->
+        <div class="rates-bar-container">
+          <div id="ratesBar" class="rates-bar"></div>
+        </div>
+        <!-- Main Content -->
+        <div class="content">
+          <!-- Currency 1 Segmented Control -->
+          <h3 class="section-title">Currency</h3>
+          <div id="currency1Segment" class="segmented-control"></div>
+          <!-- Metric 1 Segmented Control -->
+          <h3 class="section-title">Metric</h3>
+          <div id="metric1Segment" class="segmented-control"></div>
+          <!-- Price & Area Fields -->
+          <input type="text" id="priceInput" class="text-field" placeholder="Price" />
+          <input type="text" id="areaInput" class="text-field" placeholder="Area" />
+          <!-- Converted Values -->
+          <h3 id="convertedValueDisplay" class="result-text">0 USD per sqft</h3>
+          <div id="currency2Segment" class="segmented-control"></div>
+          <div id="metric2Segment" class="segmented-control"></div>
+          <h3 id="convertedValueDisplay2" class="result-text">0 USD per sqft</h3>
+          <!-- Bookmarks -->
+          <button id="addBookmarkBtn" class="primary-btn">Add to Bookmarks</button>
+          <p id="bookmarkInfo" class="bookmark-info">You can add 3 more bookmarks.</p>
+          <div id="bookmarksList" class="bookmark-list"></div>
+        </div>
+      </div>
+      <!-- Home Indicator -->
+      <div class="home-indicator"></div>
+    </div>
   </div>
   
   <!-- Settings Modal -->
@@ -602,26 +634,6 @@
         <h3>Base Currency</h3>
         <select id="baseCurrencySelect" class="modal-select"></select>
       </div>
-    </div>
-  </div>
-
-  <!-- Right Sidebar -->
-  <button id="sidebarToggle" class="sidebar-toggle">›</button>
-  <div id="sidebar" class="sidebar">
-    <div class="sidebar-header">
-      <h2>History & Info</h2>
-      <button class="sidebar-close" id="sidebarClose">&times;</button>
-    </div>
-    
-    <h3>Recent Conversions</h3>
-    <div id="historyList"></div>
-    <button id="clearHistory" class="clear-history">Clear History</button>
-    
-    <div class="conversion-info">
-      <h3>Conversion Cheat Sheet</h3>
-      <p>1 tsubo = 35.58 sqft and 3.31 sqm</p>
-      <p>1 sqm = 10.76 sqft and 0.303 tsubo</p>
-      <p>1 sqft = 0.028 tsubo and 0.093 sqm</p>
     </div>
   </div>
 
