@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Currency & Metric Converter</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     /* Reset & Base Styles */
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -13,13 +14,42 @@
       font-family: 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: linear-gradient(135deg, #121212, #1c1c1c);
       color: #eee;
-    }
-    body {
-      display: flex;
-      align-items: center;
-      justify-content: center;
       overflow: hidden;
     }
+    
+    /* Layout */
+    .app-container {
+      display: grid;
+      grid-template-columns: 300px 1fr 300px;
+      height: 100vh;
+      max-width: 2000px;
+      margin: 0 auto;
+    }
+    
+    /* Left Panel - Bookmarks */
+    .left-panel {
+      background: rgba(30, 30, 40, 0.8);
+      border-right: 1px solid #333;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    
+    /* Center Content */
+    .main-content {
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    
+    /* Right Panel - Sidebar */
+    .sidebar {
+      background: rgba(30, 30, 40, 0.8);
+      border-left: 1px solid #333;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    
     /* Animations */
     .fade-in { animation: fadeIn 0.6s ease-out forwards; }
     @keyframes fadeIn {
@@ -35,7 +65,7 @@
 
     /* Splash Screen */
     .splash {
-      position: absolute;
+      position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
       background: linear-gradient(145deg, #1d1d1d, #242424);
       display: flex;
@@ -72,185 +102,127 @@
       box-shadow: 0 4px 16px rgba(0,0,0,0.5);
     }
 
-    /* Phone Frame - Neumorphism & Depth */
-    .phone-frame {
-      position: relative;
-      width: 375px;
-      height: 812px;
-      border-radius: 40px;
-      overflow: hidden;
-      background: linear-gradient(145deg, #232323 60%, #1a1a1a 100%);
-      box-shadow: 0 30px 60px rgba(0,0,0,0.9), 0 4px 24px #222 inset;
-      border: 6px solid #222;
-      display: none;
+    /* App Header */
+    .app-header {
+      background: linear-gradient(90deg, #5E5CE6, #007AFF);
+      padding: 20px;
+      text-align: center;
+      border-radius: 12px;
+      margin-bottom: 20px;
     }
-
-    /* Notch & Speaker */
-    .notch {
-      position: absolute;
-      top: 0; left: 50%;
-      transform: translateX(-50%);
-      width: 220px; height: 34px;
-      background: #000;
-      border-bottom-left-radius: 18px;
-      border-bottom-right-radius: 18px;
-      margin-top: 8px;
-      z-index: 10;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.6);
-    }
-    .speaker {
-      position: absolute;
-      top: 10px; left: 50%;
-      transform: translateX(-50%);
-      width: 70px; height: 6px;
-      background: #333;
-      border-radius: 3px;
-      z-index: 11;
-    }
-
-    /* Home Indicator */
-    .home-indicator {
-      position: absolute;
-      bottom: 8px; left: 50%;
-      transform: translateX(-50%);
-      width: 130px; height: 6px;
-      background: #444;
-      border-radius: 3px;
-      z-index: 10;
-      opacity: 0.8;
-    }
-
-    /* Screen Area */
-    .screen {
-      position: absolute;
-      top: 48px; bottom: 48px; left: 0; right: 0;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      background: #181818;
-      border-top: 1px solid rgba(255,255,255,0.08);
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-      padding-bottom: 16px;
-      box-shadow: 0 2px 8px #111 inset;
-    }
-
-    /* Navigation Bar */
-    .navbar {
+    .app-header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: white;
+      letter-spacing: 0.5px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      height: 44px;
-      padding: 0 16px;
-      background: transparent;
-      position: relative;
+      justify-content: center;
+      gap: 10px;
     }
-    .navbar button {
-      background: none;
-      border: none;
-      color: #eee;
-      font-size: 22px;
-      cursor: pointer;
-      transition: transform 0.2s;
-      position: relative;
+    .app-header p {
+      font-size: 1rem;
+      color: rgba(255,255,255,0.85);
+      margin-top: 8px;
     }
-    .navbar button:hover {
-      transform: scale(1.15);
-    }
-    .navbar button[title]:hover::after {
-      content: attr(title);
-      position: absolute;
-      top: 36px; right: 0;
-      background: #222;
-      color: #fff;
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 13px;
-      white-space: nowrap;
-      z-index: 100;
-      opacity: 0.92;
-    }
-
-    /* Rates Bar - Custom Scrollbar */
+    
+    /* Rates Bar - Fully Visible */
     .rates-bar-container {
-      margin: 8px 16px;
       background: #262626;
-      border-radius: 8px;
-      overflow: hidden;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 20px;
     }
     .rates-bar {
       display: flex;
-      overflow-x: auto;
-      scrollbar-width: thin;
-      scrollbar-color: #5E5CE6 #262626;
-    }
-    .rates-bar::-webkit-scrollbar {
-      height: 6px;
-      background: #262626;
-    }
-    .rates-bar::-webkit-scrollbar-thumb {
-      background: #5E5CE6;
-      border-radius: 6px;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
     }
     .rate-item {
-      flex: none;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px 14px;
+      padding: 10px 16px;
       background: linear-gradient(145deg, #5E5CE6, #007AFF);
-      margin-right: 6px;
-      font-size: 14px;
+      font-size: 15px;
       color: #fff;
       white-space: nowrap;
-      border-radius: 6px;
+      border-radius: 8px;
       transition: transform 0.2s, box-shadow 0.2s;
       box-shadow: 0 2px 8px rgba(94,92,230,0.07) inset, 0 1px 2px #111;
+      min-width: 120px;
     }
     .rate-item:hover {
       transform: scale(1.05);
       box-shadow: 0 3px 12px rgba(0,0,0,0.5);
     }
 
-    /* Content Area */
-    .content {
-      padding: 12px 16px;
+    /* Conversion Sections */
+    .conversion-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
     }
+    @media (max-width: 1200px) {
+      .conversion-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .conversion-section {
+      background: rgba(40,40,40,0.5);
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+    
     .section-title {
-      margin: 18px 0 8px;
+      margin: 0 0 20px;
       font-weight: 600;
-      font-size: 15px;
+      font-size: 18px;
       color: #ddd;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
+    .section-title i {
+      color: #5E5CE6;
+    }
+    
     .result-text {
-      font-size: 1.5rem;
+      font-size: 1.8rem;
       color: #5E5CE6;
       background: rgba(94,92,230,0.08);
-      border-radius: 8px;
-      padding: 12px 0;
-      margin: 18px 0;
+      border-radius: 10px;
+      padding: 20px 15px;
+      margin: 20px 0;
       box-shadow: 0 1px 4px #111;
       text-align: center;
       transition: background 0.3s;
+      font-weight: 600;
     }
 
-    /* Segmented Controls - Enhanced */
+    /* Segmented Controls */
     .segmented-control {
       display: flex;
       background: #262626;
       border-radius: 8px;
       overflow: hidden;
-      margin-bottom: 12px;
+      margin-bottom: 15px;
       box-shadow: 0 2px 8px rgba(94,92,230,0.07) inset, 0 1px 2px #111;
     }
     .segment-btn {
       flex: 1;
-      padding: 12px 0;
+      padding: 14px 0;
       text-align: center;
       border: none;
       background: none;
       color: #ccc;
-      font-size: 14px;
+      font-size: 15px;
       cursor: pointer;
       transition: background 0.2s, color 0.2s, transform 0.1s;
     }
@@ -268,13 +240,13 @@
     /* Text Fields */
     .text-field {
       width: 100%;
-      margin-bottom: 10px;
-      padding: 12px;
+      margin-bottom: 15px;
+      padding: 15px;
       border: none;
       border-radius: 10px;
       background: rgba(94, 92, 230, 0.2);
       color: #fff;
-      font-size: 16px;
+      font-size: 18px;
       outline: none;
       transition: background 0.2s, transform 0.2s;
       box-shadow: 0 1px 4px #111;
@@ -287,10 +259,10 @@
       color: #aaa;
     }
 
-    /* Primary Button - Enhanced */
+    /* Primary Button */
     .primary-btn {
       width: 100%;
-      padding: 16px;
+      padding: 18px;
       border-radius: 12px;
       background: linear-gradient(90deg, #5E5CE6 60%, #007AFF 100%);
       color: #fff;
@@ -298,8 +270,10 @@
       font-weight: 700;
       box-shadow: 0 2px 12px #222;
       transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
-      margin-top: 10px;
+      margin-top: 15px;
       text-align: center;
+      border: none;
+      cursor: pointer;
     }
     .primary-btn:hover {
       background: linear-gradient(90deg, #6f6df7 60%, #339cff 100%);
@@ -316,216 +290,255 @@
       box-shadow: none;
     }
 
-    /* Bookmarks - Card Style */
+    /* Bookmarks - Left Panel */
+    .bookmarks-panel {
+      background: rgba(40,40,40,0.5);
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    
     .bookmark-info {
-      margin: 6px 0 10px;
-      font-size: 14px;
+      margin: 15px 0;
+      font-size: 16px;
       color: #999;
       text-align: center;
     }
-    .bookmark-list .bookmark-item {
+    .bookmark-list {
+      flex-grow: 1;
+      overflow-y: auto;
+      margin-top: 10px;
+    }
+    .bookmark-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
       background: linear-gradient(90deg, #23234b 60%, #262626 100%);
       border: 1px solid #3939a5;
       box-shadow: 0 1px 4px #111;
-      padding: 10px 14px;
-      border-radius: 8px;
-      margin-bottom: 8px;
-      transition: background 0.2s;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      transition: all 0.3s;
     }
-    .bookmark-list .bookmark-item:hover {
+    .bookmark-item:hover {
       background: #333;
+      transform: translateX(5px);
     }
-    .bookmark-list .bookmark-btn {
+    .bookmark-btn {
       background: none;
       border: none;
       color: #fff;
-      font-size: 14px;
+      font-size: 16px;
       text-align: left;
       cursor: pointer;
+      flex-grow: 1;
+      padding: 5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
-    .bookmark-list .delete-btn {
+    .delete-btn {
       background: none;
       border: none;
       color: #FF3B30;
-      font-size: 18px;
+      font-size: 20px;
       cursor: pointer;
-    }
-
-    /* Right Sidebar */
-    .sidebar {
-      position: fixed;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      width: 280px;
-      background: #1e1e1e;
-      transform: translateX(100%);
-      transition: transform 0.3s ease;
-      z-index: 900;
-      padding: 20px;
-      overflow-y: auto;
-      border-left: 1px solid #333;
-      box-shadow: -5px 0 15px rgba(0,0,0,0.3);
-    }
-    .sidebar.active {
-      transform: translateX(0);
-    }
-    .sidebar-toggle {
-      position: fixed;
-      right: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      background: #5E5CE6;
-      color: white;
-      border: none;
-      width: 30px;
-      height: 60px;
-      border-radius: 5px 0 0 5px;
-      cursor: pointer;
-      z-index: 800;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 18px;
+      transition: background 0.2s;
     }
-    .sidebar-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .delete-btn:hover {
+      background: rgba(255, 59, 48, 0.2);
+    }
+
+    /* Sidebar Content */
+    .sidebar-section {
+      background: rgba(40,40,40,0.5);
+      border-radius: 15px;
+      padding: 20px;
       margin-bottom: 20px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #333;
-    }
-    .sidebar-header h2 {
-      font-size: 18px;
-      color: #eee;
-    }
-    .sidebar-close {
-      background: none;
-      border: none;
-      color: #aaa;
-      font-size: 24px;
-      cursor: pointer;
-    }
-    .conversion-info {
-      margin-top: 20px;
-      padding-top: 20px;
-      border-top: 1px solid #333;
-    }
-    .conversion-info h3 {
-      font-size: 16px;
-      margin-bottom: 10px;
-      color: #ddd;
-    }
-    .conversion-info p {
-      font-size: 14px;
-      line-height: 1.5;
-      color: #bbb;
-      margin-bottom: 8px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
     }
     
-    /* Base Currency Select in Sidebar */
-    .modal-section {
-      margin-top: 16px;
-    }
-    .modal-section h3 {
-      font-size: 16px;
-      margin-bottom: 8px;
-      color: #ddd;
-    }
     .modal-select {
       width: 100%;
-      padding: 10px;
+      padding: 12px 15px;
       background: rgba(94, 92, 230, 0.2);
       border: none;
       border-radius: 8px;
       color: #fff;
-      margin-bottom: 8px;
       outline: none;
-      font-size: 14px;
+      font-size: 15px;
+      margin-bottom: 15px;
     }
     .modal-select option {
       background: #333;
       color: #fff;
     }
-
-    /* Responsive Tweaks */
-    @media (max-width: 400px) {
-      .phone-frame { width: 100vw; height: 100vh; border-radius: 0; }
-      .sidebar { width: 85vw; }
+    
+    .conversion-card {
+      background: rgba(94, 92, 230, 0.1);
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+    .conversion-card h4 {
+      font-size: 18px;
+      margin-bottom: 10px;
+      color: #ddd;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .conversion-card p {
+      font-size: 16px;
+      color: #bbb;
+      line-height: 1.6;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 1000px) {
+      .app-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr auto;
+        height: auto;
+        min-height: 100vh;
+      }
+      .left-panel, .sidebar {
+        border: none;
+        border-top: 1px solid #333;
+      }
+      .left-panel {
+        order: 3;
+      }
+      .sidebar {
+        order: 2;
+      }
+      .main-content {
+        order: 1;
+      }
+    }
+    
+    @media (max-width: 600px) {
+      .app-header h1 {
+        font-size: 1.5rem;
+      }
+      .result-text {
+        font-size: 1.4rem;
+      }
+      .section-title {
+        font-size: 16px;
+      }
+      .text-field {
+        font-size: 16px;
+        padding: 12px;
+      }
+      .segment-btn {
+        padding: 12px 0;
+        font-size: 14px;
+      }
     }
   </style>
 </head>
 <body>
   <!-- Splash / Get Started Screen -->
   <div id="splash" class="splash fade-in">
-    <h1>Welcome to PSF Converter</h1>
-    <p>A modern currency and metric conversion app that bridges international transactions.</p>
+    <h1>Currency & Metric Converter</h1>
+    <p>Convert between currencies and area units with real-time exchange rates</p>
     <button id="enterAppBtn" class="pulse">Get Started</button>
   </div>
   
-  <!-- Phone Frame -->
-  <div id="appFrame" class="phone-frame fade-in">
-    <!-- Notch & Speaker -->
-    <div class="notch"></div>
-    <div class="speaker"></div>
-    <!-- Screen Area -->
-    <div class="screen">
-      <!-- Navigation Bar -->
-      <div class="navbar"></div>
-      <!-- Rates Bar -->
-      <div class="rates-bar-container">
-        <div id="ratesBar" class="rates-bar"></div>
-      </div>
-      <!-- Main Content -->
-      <div class="content">
-        <!-- Currency 1 Segmented Control -->
-        <h3 class="section-title">Currency</h3>
-        <div id="currency1Segment" class="segmented-control"></div>
-        <!-- Metric 1 Segmented Control -->
-        <h3 class="section-title">Metric</h3>
-        <div id="metric1Segment" class="segmented-control"></div>
-        <!-- Price & Area Fields -->
-        <input type="text" id="priceInput" class="text-field" placeholder="Price" />
-        <input type="text" id="areaInput" class="text-field" placeholder="Area" />
-        <!-- Converted Values -->
-        <h3 id="convertedValueDisplay" class="result-text">0 USD per sqft</h3>
-        <div id="currency2Segment" class="segmented-control"></div>
-        <div id="metric2Segment" class="segmented-control"></div>
-        <h3 id="convertedValueDisplay2" class="result-text">0 USD per sqft</h3>
-        <!-- Bookmarks -->
-        <button id="addBookmarkBtn" class="primary-btn">Add to Bookmarks</button>
-        <p id="bookmarkInfo" class="bookmark-info">You can add 3 more bookmarks.</p>
+  <!-- Main App Container -->
+  <div id="appContainer" class="app-container fade-in" style="display: none;">
+    <!-- Left Panel - Bookmarks -->
+    <div class="left-panel">
+      <div class="bookmarks-panel">
+        <h2 class="section-title"><i class="fas fa-bookmark"></i> Saved Conversions</h2>
+        <p id="bookmarkInfo" class="bookmark-info">You can add 10 more bookmarks.</p>
         <div id="bookmarksList" class="bookmark-list"></div>
       </div>
     </div>
-    <!-- Home Indicator -->
-    <div class="home-indicator"></div>
-  </div>
-  
-  <!-- Right Sidebar -->
-  <button id="sidebarToggle" class="sidebar-toggle">›</button>
-  <div id="sidebar" class="sidebar">
-    <div class="sidebar-header">
-      <h2>Base Currency</h2>
-      <button class="sidebar-close" id="sidebarClose">&times;</button>
+    
+    <!-- Center Content -->
+    <div class="main-content">
+      <!-- App Header -->
+      <div class="app-header">
+        <h1><i class="fas fa-exchange-alt"></i> Currency & Metric Converter</h1>
+        <p>Real-time exchange rates and unit conversions</p>
+      </div>
+      
+      <!-- Rates Bar - Fully Visible -->
+      <div class="rates-bar-container">
+        <div id="ratesBar" class="rates-bar"></div>
+      </div>
+      
+      <!-- Conversion Sections -->
+      <div class="conversion-grid">
+        <!-- Conversion Section 1 -->
+        <div class="conversion-section">
+          <h2 class="section-title"><i class="fas fa-calculator"></i> Conversion Input</h2>
+          
+          <div class="segmented-control" id="currency1Segment"></div>
+          <div class="segmented-control" id="metric1Segment"></div>
+          
+          <input type="text" id="priceInput" class="text-field" placeholder="Enter price">
+          <input type="text" id="areaInput" class="text-field" placeholder="Enter area">
+          
+          <h3 class="result-text" id="convertedValueDisplay">0 USD per sqft</h3>
+        </div>
+        
+        <!-- Conversion Section 2 -->
+        <div class="conversion-section">
+          <h2 class="section-title"><i class="fas fa-sync-alt"></i> Converted Result</h2>
+          
+          <div class="segmented-control" id="currency2Segment"></div>
+          <div class="segmented-control" id="metric2Segment"></div>
+          
+          <h3 class="result-text" id="convertedValueDisplay2">0 JPY per sqft</h3>
+          
+          <button id="addBookmarkBtn" class="primary-btn">
+            <i class="fas fa-bookmark"></i> Add to Bookmarks
+          </button>
+        </div>
+      </div>
     </div>
     
-    <!-- Base Currency Selector -->
-    <div class="modal-section">
-      <h3>Select Base Currency</h3>
-      <select id="baseCurrencySelect" class="modal-select"></select>
-    </div>
-    
-    <!-- Conversion Cheat Sheet -->
-    <div class="conversion-info">
-      <h3>Conversion Cheat Sheet</h3>
-      <p>1 tsubo = 35.58 sqft and 3.31 sqm</p>
-      <p>1 sqm = 10.76 sqft and 0.303 tsubo</p>
-      <p>1 sqft = 0.028 tsubo and 0.093 sqm</p>
+    <!-- Right Panel - Sidebar -->
+    <div class="sidebar">
+      <!-- Base Currency Section -->
+      <div class="sidebar-section">
+        <h2 class="section-title"><i class="fas fa-dollar-sign"></i> Base Currency</h2>
+        <select id="baseCurrencySelect" class="modal-select"></select>
+        <p>Select the base currency for exchange rate calculations. Rates update automatically.</p>
+      </div>
+      
+      <!-- Cheat Sheet Section -->
+      <div class="sidebar-section">
+        <h2 class="section-title"><i class="fas fa-lightbulb"></i> Area Conversion Reference</h2>
+        
+        <div class="conversion-card">
+          <h4><i class="fas fa-flag"></i> Tsubo</h4>
+          <p>1 tsubo = 35.58 sqft<br>1 tsubo = 3.31 sqm</p>
+        </div>
+        
+        <div class="conversion-card">
+          <h4><i class="fas fa-ruler"></i> Square Meter</h4>
+          <p>1 sqm = 10.76 sqft<br>1 sqm = 0.303 tsubo</p>
+        </div>
+        
+        <div class="conversion-card">
+          <h4><i class="fas fa-square"></i> Square Foot</h4>
+          <p>1 sqft = 0.028 tsubo<br>1 sqft = 0.093 sqm</p>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -557,7 +570,7 @@
     // DOM Elements
     const splashEl = document.getElementById("splash");
     const enterAppBtn = document.getElementById("enterAppBtn");
-    const appFrameEl = document.getElementById("appFrame");
+    const appContainerEl = document.getElementById("appContainer");
     const ratesBarEl = document.getElementById("ratesBar");
     const priceInputEl = document.getElementById("priceInput");
     const areaInputEl = document.getElementById("areaInput");
@@ -570,9 +583,6 @@
     const metric1SegmentEl = document.getElementById("metric1Segment");
     const currency2SegmentEl = document.getElementById("currency2Segment");
     const metric2SegmentEl = document.getElementById("metric2Segment");
-    const sidebar = document.getElementById("sidebar");
-    const sidebarToggle = document.getElementById("sidebarToggle");
-    const sidebarClose = document.getElementById("sidebarClose");
     const baseCurrencySelectEl = document.getElementById("baseCurrencySelect");
 
     // ---------------------------
@@ -580,20 +590,7 @@
     // ---------------------------
     enterAppBtn.addEventListener("click", () => {
       splashEl.style.display = "none";
-      appFrameEl.style.display = "block";
-    });
-    
-    // ---------------------------
-    // SIDEBAR TOGGLE
-    // ---------------------------
-    sidebarToggle.addEventListener("click", () => {
-      sidebar.classList.toggle("active");
-      sidebarToggle.style.display = "none";
-    });
-    
-    sidebarClose.addEventListener("click", () => {
-      sidebar.classList.remove("active");
-      sidebarToggle.style.display = "flex";
+      appContainerEl.style.display = "grid";
     });
     
     // ---------------------------
@@ -652,7 +649,7 @@
     // Handle base currency change
     baseCurrencySelectEl.addEventListener("change", e => {
       baseCurrency = e.target.value;
-      updateRatesBar();
+      fetchExchangeRates();
     });
     
     // ---------------------------
@@ -707,7 +704,7 @@
     }
     
     // ---------------------------
-    // EXCHANGE RATES BAR
+    // EXCHANGE RATES BAR - Now fully visible
     // ---------------------------
     function updateRatesBar() {
       ratesBarEl.innerHTML = "";
@@ -749,6 +746,18 @@
         updateRatesBar();
       } catch (error) {
         console.error("Error fetching exchange rates:", error);
+        // Fallback rates if API fails
+        exchangeRates = {
+          "JPY": 144.32,
+          "SGD": 1.35,
+          "USD": 1.0,
+          "GBP": 0.79,
+          "HKD": 7.82,
+          "CNY": 7.18,
+          "MYR": 4.68
+        };
+        updateConvertedDisplay();
+        updateRatesBar();
       }
     }
     
@@ -756,9 +765,9 @@
     // BOOKMARKS
     // ---------------------------
     function updateBookmarkInfo() {
-      const remaining = Math.max(0, 3 - bookmarks.length);
+      const remaining = Math.max(0, 10 - bookmarks.length);
       bookmarkInfoEl.textContent = `You can add ${remaining} more bookmarks.`;
-      addBookmarkBtn.disabled = bookmarks.length >= 3;
+      addBookmarkBtn.disabled = bookmarks.length >= 10;
     }
     
     function renderBookmarks() {
@@ -766,18 +775,28 @@
       bookmarks.forEach((bm, index) => {
         const item = document.createElement("div");
         item.className = "bookmark-item";
+        
         const btn = document.createElement("button");
         btn.className = "bookmark-btn";
-        btn.textContent = `${bm.currency} ${bm.metric} / ${bm.currency2} ${bm.metric2}`;
+        btn.innerHTML = `
+          <i class="fas fa-exchange-alt"></i>
+          <div>
+            <strong>${bm.currency} ${bm.metric}</strong>
+            <div>→ ${bm.currency2} ${bm.metric2}</div>
+          </div>
+        `;
         btn.addEventListener("click", () => applyBookmark(bm));
+        
         const delBtn = document.createElement("button");
         delBtn.className = "delete-btn";
         delBtn.innerHTML = "&times;";
-        delBtn.addEventListener("click", () => {
+        delBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
           bookmarks.splice(index, 1);
           renderBookmarks();
           updateBookmarkInfo();
         });
+        
         item.appendChild(btn);
         item.appendChild(delBtn);
         bookmarksListEl.appendChild(item);
@@ -785,7 +804,7 @@
     }
     
     function addBookmark() {
-      if (bookmarks.length < 3) {
+      if (bookmarks.length < 10) {
         const newBookmark = {
           currency: currencyOptions[selectedCurrency],
           metric: metricOptions[selectedMetric],
