@@ -2,22 +2,21 @@
 <html lang="en">
 <head>
   <!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-MR74J5NL');</script>
-<!-- End Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-MR74J5NL');</script>
+  <!-- End Google Tag Manager -->
 
   <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-QY8ZZHZ701"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-QY8ZZHZ701');
-</script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QY8ZZHZ701"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-QY8ZZHZ701');
+  </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Currency & Metric Converter</title>
@@ -31,14 +30,15 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       font-family: 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: linear-gradient(135deg, #121212, #1c1c1c);
       color: #eee;
-      overflow: hidden;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
     }
     
     /* Layout */
     .app-container {
       display: grid;
       grid-template-columns: 300px 1fr 300px;
-      height: 100vh;
+      min-height: 100vh;
       max-width: 2000px;
       margin: 0 auto;
     }
@@ -49,6 +49,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       border-right: 1px solid #333;
       padding: 20px;
       overflow-y: auto;
+      position: sticky;
+      top: 0;
+      height: 100vh;
     }
     
     /* Center Content */
@@ -65,6 +68,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       border-left: 1px solid #333;
       padding: 20px;
       overflow-y: auto;
+      position: sticky;
+      top: 0;
+      height: 100vh;
     }
     
     /* Animations */
@@ -79,46 +85,302 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       50% { transform: scale(1.05); }
       100% { transform: scale(1); }
     }
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-15px); }
+      100% { transform: translateY(0px); }
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes scrollFade {
+      0% { opacity: 0; transform: translateY(50px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
 
     /* Splash Screen */
     .splash {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: linear-gradient(145deg, #1d1d1d, #242424);
+      position: relative;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      z-index: 1000;
       text-align: center;
       padding: 0 20px;
+      overflow-x: hidden;
     }
+    .splash::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+      animation: rotate 20s linear infinite;
+      z-index: -1;
+    }
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    .splash-content {
+      max-width: 800px;
+      padding: 40px;
+      background: rgba(16, 18, 33, 0.8);
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(94, 92, 230, 0.2);
+      z-index: 2;
+      animation: fadeInUp 0.8s ease-out 0.2s forwards;
+      opacity: 0;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .splash-logo {
+      margin-bottom: 30px;
+      animation: float 4s ease-in-out infinite;
+    }
+    .splash-logo i {
+      font-size: 4rem;
+      color: #5E5CE6;
+      background: linear-gradient(45deg, #5E5CE6, #007AFF);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-fill-color: transparent;
+    }
+    
     .splash h1 {
-      font-size: 2.8rem;
+      font-size: 3.5rem;
       margin-bottom: 20px;
       letter-spacing: 1px;
+      background: linear-gradient(to right, #5E5CE6, #007AFF);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-fill-color: transparent;
+      font-weight: 800;
+      line-height: 1.2;
     }
     .splash p {
-      font-size: 1.1rem;
-      margin-bottom: 30px;
-      color: #bbb;
+      font-size: 1.4rem;
+      margin-bottom: 40px;
+      color: #c4c4ff;
+      line-height: 1.6;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
     }
     .splash button {
-      padding: 12px 28px;
+      padding: 16px 50px;
       border: none;
-      border-radius: 12px;
+      border-radius: 50px;
       background: linear-gradient(to right, #5E5CE6, #007AFF);
       color: #fff;
-      font-size: 1.1rem;
-      font-weight: 500;
+      font-size: 1.3rem;
+      font-weight: 600;
       cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(94, 92, 230, 0.4);
+      margin-top: 20px;
+    }
+    .splash button::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: rgba(255,255,255,0.1);
+      transform: rotate(30deg);
+      transition: all 0.6s;
     }
     .splash button:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(94, 92, 230, 0.6);
+    }
+    .splash button:hover::after {
+      transform: rotate(30deg) translate(100px, 100px);
+    }
+    
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 25px;
+      margin-top: 50px;
+      text-align: left;
+    }
+    .feature-card {
+      background: rgba(25, 28, 50, 0.6);
+      border-radius: 15px;
+      padding: 25px;
+      border: 1px solid rgba(94, 92, 230, 0.15);
+      transition: all 0.3s ease;
+    }
+    .feature-card:hover {
+      transform: translateY(-10px);
+      border-color: rgba(94, 92, 230, 0.4);
+      background: rgba(30, 33, 60, 0.7);
+    }
+    .feature-card i {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      color: #5E5CE6;
+    }
+    .feature-card h3 {
+      font-size: 1.4rem;
+      margin-bottom: 15px;
+      color: #fff;
+    }
+    .feature-card p {
+      font-size: 1rem;
+      color: #a0a0ff;
+      margin-bottom: 0;
+    }
+    
+    .floating-shapes {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .shape {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.1;
+    }
+    .shape-1 {
+      width: 300px;
+      height: 300px;
+      background: linear-gradient(135deg, #5E5CE6, #007AFF);
+      top: 10%;
+      left: 10%;
+      animation: float 8s ease-in-out infinite;
+    }
+    .shape-2 {
+      width: 200px;
+      height: 200px;
+      background: linear-gradient(135deg, #007AFF, #00bfff);
+      bottom: 15%;
+      right: 15%;
+      animation: float 10s ease-in-out infinite;
+      animation-delay: 1s;
+    }
+    .shape-3 {
+      width: 150px;
+      height: 150px;
+      background: linear-gradient(135deg, #5E5CE6, #9d4edd);
+      top: 40%;
+      right: 20%;
+      animation: float 12s ease-in-out infinite;
+      animation-delay: 2s;
+    }
+    
+    /* FAQ Section */
+    .faq-section {
+      margin-top: 50px;
+      padding: 20px 0;
+      background: none;
+      border: none;
+      width: 100%;
+    }
+    .faq-section h2 {
+      font-size: 2rem;
+      color: #fff;
+      margin-bottom: 20px;
+      text-align: center;
+      background: linear-gradient(to right, #5E5CE6, #007AFF);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .faq-item {
+      margin-bottom: 15px;
+      padding: 15px 20px;
+      background: rgba(30, 33, 60, 0.7);
+      border-radius: 10px;
+      transition: all 0.3s ease;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .faq-item:hover {
+      transform: translateY(-5px);
+      background: rgba(40, 43, 70, 0.9);
+    }
+    .faq-question {
+      font-size: 1.2rem;
+      color: #c4c4ff;
+      margin-bottom: 10px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .faq-toggle {
+      font-size: 1.2rem;
+      transition: transform 0.3s ease;
+    }
+    .faq-item.active .faq-toggle {
+      transform: rotate(45deg);
+    }
+    .faq-answer {
+      font-size: 1rem;
+      color: #a0a0ff;
+      display: none;
+      padding-left: 20px;
+      padding-top: 10px;
+    }
+    .faq-item.active .faq-answer {
+      display: block;
     }
 
+    /* Responsive Design */
+    @media (max-width: 900px) {
+      .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .splash h1 {
+        font-size: 3rem;
+      }
+      .splash p {
+        font-size: 1.2rem;
+      }
+    }
+    @media (max-width: 600px) {
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+      .splash h1 {
+        font-size: 2.3rem;
+      }
+      .splash p {
+        font-size: 1.1rem;
+      }
+      .splash-content {
+        padding: 30px 20px;
+      }
+      .splash button {
+        padding: 14px 40px;
+        font-size: 1.1rem;
+      }
+    }
+
+    /* The rest of the styles for the app remain unchanged */
+    /* ... (all your existing styles for the app) ... */
+    
     /* App Header */
     .app-header {
       background: linear-gradient(90deg, #5E5CE6, #007AFF);
@@ -467,15 +729,78 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 </head>
 <body>
   <!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MR74J5NL"
-height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-<!-- End Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MR74J5NL"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
   
-  <!-- Splash / Get Started Screen -->
+  <!-- NEW Splash / Get Started Screen -->
   <div id="splash" class="splash fade-in">
-    <h1>Currency & Metric Converter</h1>
-    <p>Convert between currencies and area units with real-time exchange rates</p>
-    <button id="enterAppBtn" class="pulse">Get Started</button>
+    <div class="floating-shapes">
+      <div class="shape shape-1"></div>
+      <div class="shape shape-2"></div>
+      <div class="shape shape-3"></div>
+    </div>
+    
+    <div class="splash-content">
+      <div class="splash-logo">
+        <i class="fas fa-exchange-alt"></i>
+      </div>
+      
+      <h1>PSF Converter</h1>
+      <p>Convert between currencies and area units with real-time exchange rates</p>
+      <p>Developed by Shota Sato</p>
+      
+      <button id="enterAppBtn">Get Started</button>
+      
+      <div class="features-grid">
+        <div class="feature-card">
+          <i class="fas fa-bolt"></i>
+          <h3>Real-time Rates</h3>
+          <p>Get up-to-date currency exchange rates from global markets</p>
+        </div>
+        
+        <div class="feature-card">
+          <i class="fas fa-ruler-combined"></i>
+          <h3>Multi-unit Conversion</h3>
+          <p>Convert between sqft, sqm, tsubo and more with precision</p>
+        </div>
+        
+        <div class="feature-card">
+          <i class="fas fa-bookmark"></i>
+          <h3>Save & Compare</h3>
+          <p>Bookmark your favorite conversions for quick access</p>
+        </div>
+      </div>
+      
+      <!-- FAQ Section -->
+      <div class="faq-section">
+        <h2>Frequently Asked Questions</h2>
+        <div class="faq-item">
+          <div class="faq-question">Is PSF Converter Free?</div>
+          <div class="faq-answer">Yes, PSF Converter is free for all users. All users will be able to use our latest model and have access to the real-time exchange rates.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">Can I use psfconverter.com for currency conversion too?</div>
+          <div class="faq-answer">Yes. The site includes real-time currency exchange rates, so you can easily convert prices from dollars to yen and vice versa.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">How do I convert from USD/ft² to JPY/tsubo?</div>
+          <div class="faq-answer">
+            To convert from USD/ft² to JPY/tsubo, follow these steps:
+            <ul>
+              <li>Select "USD" as the currency and "sqft" as the metric.</li>
+              <li>Enter the price in USD/ft² in the conversion input field.</li>
+              <li>Select "JPY" as the target currency and "tsubo" as the target metric.</li>
+              <li>The result will be calculated automatically based on real-time exchange rates and the conversion facto.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">What is a "tsubo"?</div>
+          <div class="faq-answer">A tsubo is a Japanese unit of area equal to about 3.3 square meters or 35.6 square feet. It’s commonly used in Japanese real estate.</div>
+        </div>
+      </div>
+    </div>
   </div>
   
   <!-- Main App Container -->
@@ -607,12 +932,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     const metric2SegmentEl = document.getElementById("metric2Segment");
     const baseCurrencySelectEl = document.getElementById("baseCurrencySelect");
 
+    // FAQ Interactivity
+    document.querySelectorAll('.faq-question').forEach(question => {
+      question.addEventListener('click', () => {
+        const item = question.parentElement;
+        item.classList.toggle('active');
+      });
+    });
+
     // ---------------------------
     // SPLASH SCREEN
     // ---------------------------
     enterAppBtn.addEventListener("click", () => {
-      splashEl.style.display = "none";
-      appContainerEl.style.display = "grid";
+      splashEl.style.opacity = 0;
+      splashEl.style.pointerEvents = "none";
+      splashEl.style.transition = "opacity 0.8s ease";
+      
+      setTimeout(() => {
+        splashEl.style.display = "none";
+        appContainerEl.style.display = "grid";
+      }, 800);
     });
     
     // ---------------------------
