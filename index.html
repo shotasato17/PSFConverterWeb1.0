@@ -1215,19 +1215,20 @@
         }
         
         function enterApp() {
-    splashEl.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-    splashEl.style.opacity = 0; 
-    splashEl.style.transform = 'translateY(-20px)';
-    setTimeout(() => { 
-        splashEl.style.display = 'none'; 
-        appContainerEl.style.display = 'grid'; 
-        // Remove the app-header
-        const appHeader = document.querySelector('.app-header');
-        if (appHeader) {
-            appHeader.remove();
+            splashEl.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            splashEl.style.opacity = 0; 
+            splashEl.style.transform = 'translateY(-20px)';
+            setTimeout(() => { 
+                splashEl.style.display = 'none'; 
+                appContainerEl.style.display = 'grid'; 
+                // Hide the app-header
+                const appHeader = document.querySelector('.app-header');
+                if (appHeader) {
+                    appHeader.style.display = 'none';
+                }
+                setTimeout(() => { priceInputEl.focus(); }, 100);
+            }, 600);
         }
-        setTimeout(() => { priceInputEl.focus(); }, 100);
-    }, 600);
         
         function closeModal() {
             howModal.style.transition = 'opacity 360ms ease, transform 360ms ease';
@@ -1254,6 +1255,11 @@
             setTimeout(() => { 
                 splashEl.style.display = 'none'; 
                 appContainerEl.style.display = 'grid'; 
+                // Hide the app-header
+                const appHeader = document.querySelector('.app-header');
+                if (appHeader) {
+                    appHeader.style.display = 'none';
+                }
                 priceInputEl.value = '200000';
                 areaInputEl.value = '1000';
                 price = '200000';
