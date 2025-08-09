@@ -1357,7 +1357,7 @@
                 convertedValueDisplay2El.textContent = `0 ${cur2} per ${m2}`;
                 return;
             }
-            const converted = conv * (rate2 / rate1) * (f1 / f2);
+            const converted = conv * (rate2 / rate1) * (f2 / f1);
             const v2 = Math.round(converted);
             convertedValueDisplay2El.textContent = v2 ? `${formatNumber(v2)} ${cur2} per ${m2}` : `0 ${cur2} per ${m2}`;
         }
@@ -1374,7 +1374,7 @@
             const rateJPY = exchangeRates['JPY'] || (exchangeRates['JPY'] ?? 144.32);
             const f_sqft = areaFactor['sqft'];
             const f_tsubo = areaFactor['tsubo'];
-            const converted = conv * (rateJPY / rateUSD) * (f_sqft / f_tsubo);
+            const converted = conv * (rateJPY / rateUSD) * (f_tsubo / f_sqft);
             previewResultEl.innerHTML = `
                 <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
                     <span>${formatNumber(Math.round(conv))} USD / sqft</span>
